@@ -1,4 +1,4 @@
-#My Weather bot for Telegram
+# My Weather bot for Telegram
 
 ## Was Used:
 * Telegram Bot Java Library - [TelegramBots 4.9.1](https://github.com/rubenlagus/TelegramBots)
