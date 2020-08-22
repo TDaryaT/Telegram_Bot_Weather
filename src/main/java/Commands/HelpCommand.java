@@ -8,8 +8,13 @@ import org.telegram.telegrambots.extensions.bots.commandbot.commands.ICommandReg
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HelpCommand extends BotCommand {
     private static final Logger LOGGER = LogManager.getLogger(HelpCommand.class);
@@ -38,12 +43,25 @@ public class HelpCommand extends BotCommand {
         SendMessage helpMessage = new SendMessage()
                 .setChatId(chat.getId().toString())
                 .enableHtml(true)
-                .setText(helpMessageBuilder.toString());
-
+                .setText(helpMessageBuilder.toString())
+                .setReplyMarkup(getKeyboard());
         try {
             absSender.execute(helpMessage);
         } catch (TelegramApiException e) {
             LOGGER.error("Error execute in '/help' command", e);
         }
     }
+
+    public static InlineKeyboardMarkup getKeyboard() {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+
+        rowInline.add(new InlineKeyboardButton().setText("Location").setCallbackData("/loc"));
+        rowInline.add(new InlineKeyboardButton().setText("Enter city").setCallbackData("/city"));
+        rowsInline.add(rowInline);
+
+        return markupInline.setKeyboard(rowsInline);
+    }
+
 }
