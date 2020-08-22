@@ -8,6 +8,12 @@
 .idea/**/dictionaries
 .idea/**/shelf
 
+#hidden log
+log_file.log
+
+#hidden binary files
+target
+
 # Generated files
 .idea/**/contentModel.xml
 
