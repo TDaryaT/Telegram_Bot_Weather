@@ -1,3 +1,4 @@
+import Commands.HelpCommand;
 import Commands.StartCommand;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -24,6 +25,8 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
         LOGGER.info("Registering commands...");
         LOGGER.info("Registering '/start'...");
         register(new StartCommand());
+        LOGGER.info("Registering '/help'...");
+        register(new HelpCommand(this));
     }
 
     /**
@@ -33,6 +36,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
      */
     @Override
     public void processNonCommandUpdate(Update update) {
+        LOGGER.info("Executing non-custom update...");
         if (update.hasMessage() && update.getMessage().hasText()) {
             SendMessage message = new SendMessage()
                     .setChatId(update.getMessage().getChatId())
@@ -40,8 +44,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             try {
                 execute(message); // Call method to send the message
             } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+                LOGGER.error("Error execute in non-custom command", e);            }
         }
     }
 
