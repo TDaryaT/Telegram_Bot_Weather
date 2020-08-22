@@ -44,7 +44,8 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             try {
                 execute(message); // Call method to send the message
             } catch (TelegramApiException e) {
-                LOGGER.error("Error execute in non-custom command", e);            }
+                LOGGER.error("Error execute in non-custom command", e);
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package Commands;
 
+import com.vdurmont.emoji.EmojiParser;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
@@ -26,9 +27,13 @@ public class HelpCommand extends BotCommand {
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
         LOGGER.info(getCommandIdentifier() + " Executing '/help' command from @" + user.getUserName() + "...");
 
-        StringBuilder helpMessageBuilder = new StringBuilder("<b>Available commands:</b>\n");
+        StringBuilder helpMessageBuilder = new StringBuilder(
+                EmojiParser.parseToUnicode("<b>What's commands I can do:question:</b>\n"));
+
         commandRegistry.getRegisteredCommands()
-                .forEach(cmd -> helpMessageBuilder.append(cmd.toString()).append("\n"));
+                .forEach(cmd -> helpMessageBuilder
+                        .append(EmojiParser.parseToUnicode(":red_circle: "))
+                        .append(cmd.toString()).append("\n"));
 
         SendMessage helpMessage = new SendMessage()
                 .setChatId(chat.getId().toString())

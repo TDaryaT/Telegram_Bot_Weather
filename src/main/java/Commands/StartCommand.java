@@ -8,12 +8,12 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import com.vdurmont.emoji.EmojiParser;
 
 public class StartCommand extends BotCommand {
     private static final Logger LOGGER = LogManager.getLogger(StartCommand.class);
 
     public StartCommand() {
-
         super("start", "start using bot\n");
     }
 
@@ -28,10 +28,13 @@ public class StartCommand extends BotCommand {
         //TODO: Проверка что первый раз
         sb.append("Hi ")
                 .append(user.getUserName())
-                .append("! Welcome to My WeatherBot! \n")
-                .append("You can send me your location and I'll tel you weather:)");
-
+                .append(EmojiParser.parseToUnicode
+                        ("! Welcome to My WeatherBot! :heart_eyes: \t\n"))
+                .append(EmojiParser.parseToUnicode
+                        ("You can send me your location and I'll tel you weather"))
+                .append(EmojiParser.parseToUnicode(":sun_with_face: :cloud_rain: :cloud_tornado:"));
         message.setText(sb.toString());
+
         try {
             absSender.execute(message);
         } catch (TelegramApiException e) {

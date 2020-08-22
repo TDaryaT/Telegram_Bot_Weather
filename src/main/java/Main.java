@@ -17,12 +17,11 @@ public class Main {
         LOGGER.info("Configuring bot options...");
         DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
 
-
         try {
             telegramBotsApi.registerBot(new MyWeatherTgBot(botOptions));
             LOGGER.info("My weather bot is ready for work!");
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            LOGGER.error("Error while initializing bot!");
         }
     }
 }
