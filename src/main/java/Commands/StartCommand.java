@@ -33,11 +33,11 @@ public class StartCommand extends BotCommand {
         //TODO: Проверка что первый раз
         sb.append("Hi ")
                 .append(user.getUserName())
+                .append("! Welcome to My WeatherBot!")
+                .append(EmojiParser.parseToUnicode(" :heart_eyes: \n"))
+                .append("You can send me your location and I'll tel you weather")
                 .append(EmojiParser.parseToUnicode
-                        ("! Welcome to My WeatherBot! :heart_eyes: \t\n"))
-                .append(EmojiParser.parseToUnicode
-                        ("You can send me your location and I'll tel you weather"))
-                .append(EmojiParser.parseToUnicode(":sun_with_face: :cloud_rain: :cloud_tornado:"));
+                        (":sun_with_face: :cloud_rain: :cloud_tornado:"));
 
         message.setText(sb.toString())
                 .setReplyMarkup(getKeyboard());

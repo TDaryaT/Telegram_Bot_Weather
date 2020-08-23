@@ -1,5 +1,7 @@
 import Commands.HelpCommand;
 import Commands.StartCommand;
+import Commands.StopCommand;
+import com.vdurmont.emoji.Emoji;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -31,7 +33,24 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
         LOGGER.info("Registering '/start'...");
         register(new StartCommand());
         LOGGER.info("Registering '/help'...");
-        register(new HelpCommand(this));
+        HelpCommand helpCommand = new HelpCommand(this);
+        register(helpCommand);
+        LOGGER.info("Registering '/stop'...");
+        register(new StopCommand());
+
+        // ответ на незарегистрированную команду
+        registerDefaultAction((absSender, message) -> {
+            SendMessage commandUnknownMessage = new SendMessage();
+            commandUnknownMessage.setChatId(message.getChatId());
+            commandUnknownMessage.setText("The command '" +
+                    message.getText() + "' is not known by this bot. Here comes some help ");
+            try {
+                absSender.execute(commandUnknownMessage);
+            } catch (TelegramApiException e) {
+                LOGGER.error("Error execute in custom unregistered command", e);
+            }
+            helpCommand.execute(absSender, message.getFrom(), message.getChat(), new String[] {});
+        });
     }
 
     /**

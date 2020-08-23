@@ -33,12 +33,12 @@ public class HelpCommand extends BotCommand {
         LOGGER.info(getCommandIdentifier() + " Executing '/help' command from @" + user.getUserName() + "...");
 
         StringBuilder helpMessageBuilder = new StringBuilder(
-                EmojiParser.parseToUnicode("<b>What's commands I can do:question:</b>\n"));
+                EmojiParser.parseToUnicode("<b>What's commands I can do:question:</b>"));
 
         commandRegistry.getRegisteredCommands()
                 .forEach(cmd -> helpMessageBuilder
-                        .append(EmojiParser.parseToUnicode(":red_circle: "))
-                        .append(cmd.toString()).append("\n"));
+                        .append(EmojiParser.parseToUnicode("\n:red_circle: "))
+                        .append(cmd.toString()));
 
         SendMessage helpMessage = new SendMessage()
                 .setChatId(chat.getId().toString())
