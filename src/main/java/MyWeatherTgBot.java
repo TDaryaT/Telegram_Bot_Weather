@@ -1,26 +1,23 @@
 import Commands.HelpCommand;
 import Commands.StartCommand;
 import Commands.StopCommand;
-import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiParser;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
 public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
     private static final String BOT_TOKEN = System.getenv("TOKEN");
     private static final String BOT_NAME = "LetMeKnowAboutWeatherBot";
 
     private static final Logger LOGGER = LogManager.getLogger(MyWeatherTgBot.class);
-
     /**
      * Конструктор и регистрация кастомных команд (вида /start)
      */
@@ -40,6 +37,9 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
 
         // ответ на незарегистрированную команду
         registerDefaultAction((absSender, message) -> {
+            LOGGER.info("Registering unknown command from @" + message.getFrom().getUserName()
+                    + " : "+ message.getText()+ "...");
+
             SendMessage commandUnknownMessage = new SendMessage();
             commandUnknownMessage.setChatId(message.getChatId());
             commandUnknownMessage.setText("The command '" +
@@ -49,27 +49,44 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             } catch (TelegramApiException e) {
                 LOGGER.error("Error execute in custom unregistered command", e);
             }
-            helpCommand.execute(absSender, message.getFrom(), message.getChat(), new String[] {});
+            helpCommand.execute(absSender, message.getFrom(), message.getChat(), new String[]{});
         });
     }
 
     /**
-     * Ответ на полученный update (сообщение не начинающееся с /)
+     * Ответ на полученный update (сообщение не начинающееся с / или из клавиатуры)
      *
      * @param update - полученное обновление
      */
     @Override
     public void processNonCommandUpdate(Update update) {
-        LOGGER.info("Executing non-custom update...");
+        SendMessage message = new SendMessage();
         if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage message = new SendMessage()
-                    .setChatId(update.getMessage().getChatId())
-                    .setText("You said: " + update.getMessage().getText());
-            try {
-                execute(message); // Call method to send the message
-            } catch (TelegramApiException e) {
-                LOGGER.error("Error execute in non-custom command", e);
-            }
+            LOGGER.info("Executing non-custom update from @" +
+                    update.getMessage().getFrom().getUserName() +
+                    " : " + update.getMessage().getText() + "...");
+
+            message.setChatId(update.getMessage().getChatId())
+                    .setText("You said: " + update.getMessage().getText() +
+                            ", I don't know what to do with this" +
+                            EmojiParser.parseToUnicode(":cry:"));
+
+        } else if (update.getMessage().hasLocation()) {
+            Location location = update.getMessage().getLocation();
+            LOGGER.info("Get location from @" + update.getMessage().getFrom().getUserName() + ' ' + location);
+
+            message.setChatId(update.getMessage().getChatId());
+            String lat = String.format(Locale.US, "%.2f", location.getLatitude());
+            String lon = String.format(Locale.US, "%.2f", location.getLongitude());
+
+            Weather weather = new Weather(lat, lon);
+
+            message.setText(weather.toWrap(weather.getWeatherNow()));
+        }
+        try {
+            execute(message); // Call method to send the message
+        } catch (TelegramApiException e) {
+            LOGGER.error("Error execute in non-custom command", e);
         }
     }
 

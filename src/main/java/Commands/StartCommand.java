@@ -7,7 +7,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.vdurmont.emoji.EmojiParser;
@@ -48,20 +51,18 @@ public class StartCommand extends BotCommand {
         }
     }
 
-    public static InlineKeyboardMarkup getKeyboard() {
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+    public static ReplyKeyboardMarkup getKeyboard() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
 
-        rowInline.add(new InlineKeyboardButton().setText("Location").setCallbackData("/loc"));
-        rowInline.add(new InlineKeyboardButton().setText("Enter city").setCallbackData("/city"));
-        rowsInline.add(rowInline);
+        List<KeyboardRow> keyboard = new ArrayList<>();
 
-        List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
-        rowInline2.add(new InlineKeyboardButton().setText("Help").setCallbackData("/help"));
-        rowInline2.add(new InlineKeyboardButton().setText("Stop").setCallbackData("/stop"));
-        rowsInline.add(rowInline2);
+        KeyboardRow keyboardFirstRow = new KeyboardRow();
+        keyboardFirstRow.add(new KeyboardButton("I'm here!").setRequestLocation(true));
 
-        return markupInline.setKeyboard(rowsInline);
+        keyboard.add(keyboardFirstRow);
+        return replyKeyboardMarkup.setKeyboard(keyboard);
     }
 }
