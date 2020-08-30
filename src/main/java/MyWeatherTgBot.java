@@ -60,7 +60,10 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
      */
     @Override
     public void processNonCommandUpdate(Update update) {
+        LOGGER.info("processNonCommandUpdate...");
         SendMessage message = new SendMessage();
+
+            //we get test message
         if (update.hasMessage() && update.getMessage().hasText()) {
             LOGGER.info("Executing non-custom update from @" +
                     update.getMessage().getFrom().getUserName() +
@@ -71,6 +74,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
                             ", I don't know what to do with this" +
                             EmojiParser.parseToUnicode(":cry:"));
 
+            //we get location
         } else if (update.getMessage().hasLocation()) {
             Location location = update.getMessage().getLocation();
             LOGGER.info("Get location from @" + update.getMessage().getFrom().getUserName() + ' ' + location);
@@ -82,6 +86,15 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             Weather weather = new Weather(lat, lon);
 
             message.setText(weather.toWrap(weather.getWeatherNow()));
+
+            //we get someone else
+        } else {
+            LOGGER.info("Executing non-custom update from @" +
+                    update.getMessage().getFrom().getUserName() + "without text!");
+
+            message.setChatId(update.getMessage().getChatId())
+                    .setText("I don't know what to do with this" +
+                            EmojiParser.parseToUnicode(":cry:"));
         }
         try {
             execute(message); // Call method to send the message
