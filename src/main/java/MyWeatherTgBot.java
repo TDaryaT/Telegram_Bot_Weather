@@ -9,8 +9,14 @@ import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingC
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import utils.TgBasePostgresql;
+import utils.Weather;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
@@ -18,6 +24,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
     private static final String BOT_NAME = "LetMeKnowAboutWeatherBot";
 
     private static final Logger LOGGER = LogManager.getLogger(MyWeatherTgBot.class);
+
     /**
      * Конструктор и регистрация кастомных команд (вида /start)
      */
@@ -38,7 +45,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
         // ответ на незарегистрированную команду
         registerDefaultAction((absSender, message) -> {
             LOGGER.info("Registering unknown command from @" + message.getFrom().getUserName()
-                    + " : "+ message.getText()+ "...");
+                    + " : " + message.getText() + "...");
 
             SendMessage commandUnknownMessage = new SendMessage();
             commandUnknownMessage.setChatId(message.getChatId());
@@ -47,7 +54,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             try {
                 absSender.execute(commandUnknownMessage);
             } catch (TelegramApiException e) {
-                LOGGER.error("Error execute in custom unregistered command", e);
+                LOGGER.error("Error execute in custom unregistered command " + e.getMessage(), e);
             }
             helpCommand.execute(absSender, message.getFrom(), message.getChat(), new String[]{});
         });
@@ -63,7 +70,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
         LOGGER.info("processNonCommandUpdate...");
         SendMessage message = new SendMessage();
 
-            //we get test message
+        //we get test message
         if (update.hasMessage() && update.getMessage().hasText()) {
             LOGGER.info("Executing non-custom update from @" +
                     update.getMessage().getFrom().getUserName() +
@@ -72,8 +79,13 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             message.setChatId(update.getMessage().getChatId())
                     .setText("You said: " + update.getMessage().getText() +
                             ", I don't know what to do with this" +
-                            EmojiParser.parseToUnicode(":cry:"));
-
+                            EmojiParser.parseToUnicode(":cry: \n") +
+                            "maybe you need /help");
+            try {
+                execute(message); // Call method to send the message
+            } catch (TelegramApiException e) {
+                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+            }
             //we get location
         } else if (update.getMessage().hasLocation()) {
             Location location = update.getMessage().getLocation();
@@ -84,9 +96,30 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             String lon = String.format(Locale.US, "%.2f", location.getLongitude());
 
             Weather weather = new Weather(lat, lon);
+            String[] parseWeather = weather.getWeatherNow();
 
-            message.setText(weather.toWrap(weather.getWeatherNow()));
+            //set new weather in base
+            TgBasePostgresql base = new TgBasePostgresql();
+            if (!base.isWeather(parseWeather)) {
+                base.addWeather(parseWeather);
+            } else if (!base.isUserCity(parseWeather[0])){
+                //TODO: лучше после обновления
+                base.addUserCity(parseWeather[0]);
+            }
+            message.setText(weather.toWrap(parseWeather))
+                    .setReplyMarkup(getKeyboard());
 
+            try {
+                execute(message); // Call method to send the message
+            } catch (TelegramApiException e) {
+                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+            }
+            //save city quick
+        } else if (update.hasCallbackQuery()) {
+                String call_data = update.getCallbackQuery().getData();
+                if (call_data.equals("save_city")) {
+                    //TODO: мониторинг погоды
+                }
             //we get someone else
         } else {
             LOGGER.info("Executing non-custom update from @" +
@@ -94,13 +127,26 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
 
             message.setChatId(update.getMessage().getChatId())
                     .setText("I don't know what to do with this" +
-                            EmojiParser.parseToUnicode(":cry:"));
+                            EmojiParser.parseToUnicode(":cry: \n") +
+                            "maybe you need /help");
+            try {
+                execute(message); // Call method to send the message
+            } catch (TelegramApiException e) {
+                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+            }
         }
-        try {
-            execute(message); // Call method to send the message
-        } catch (TelegramApiException e) {
-            LOGGER.error("Error execute in non-custom command", e);
-        }
+    }
+
+    public static InlineKeyboardMarkup getKeyboard() {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+        rowInline.add(new InlineKeyboardButton().setText("save this city?").setCallbackData("save_city"));
+        // Set the keyboard to the markup
+        rowsInline.add(rowInline);
+        // Add it to the message
+        markupInline.setKeyboard(rowsInline);
+        return markupInline;
     }
 
     @Override

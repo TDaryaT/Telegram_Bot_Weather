@@ -1,3 +1,5 @@
+package utils;
+
 import com.vdurmont.emoji.EmojiParser;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -11,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
@@ -87,6 +88,11 @@ public class Weather {
         return weatherInfo;
     }
 
+    /**
+     * translate weather for telegram bot
+     * @param weather - massive with information
+     * @return - String with message
+     */
     public String toWrap(String[] weather) {
         StringBuilder stringBuilder = new StringBuilder();
         double temp = Double.parseDouble(weather[2]) - 273.15;

@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class Main {
+
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
@@ -21,7 +22,7 @@ public class Main {
             telegramBotsApi.registerBot(new MyWeatherTgBot(botOptions));
             LOGGER.info("My weather bot is ready for work!");
         } catch (TelegramApiException e) {
-            LOGGER.error("Error while initializing bot!");
+            LOGGER.error("Error while initializing bot! " + e.getMessage());
         }
     }
 }
