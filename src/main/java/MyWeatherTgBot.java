@@ -1,23 +1,15 @@
-import Commands.HelpCommand;
-import Commands.StartCommand;
-import Commands.StopCommand;
+import Commands.*;
 import com.vdurmont.emoji.EmojiParser;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import utils.TgBasePostgresql;
-import utils.Weather;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import static Commands.ReminderCommand.*;
+import static Commands.WeatherCommand.getMessageLocation;
 
 public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
     private static final String BOT_TOKEN = System.getenv("TOKEN");
@@ -41,10 +33,14 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
         register(helpCommand);
         LOGGER.info("Registering '/stop'...");
         register(new StopCommand());
+        LOGGER.info("Registering '/weather'...");
+        register(new WeatherCommand());
+        LOGGER.info("Registering '/reminder'...");
+        register(new ReminderCommand());
 
         // ответ на незарегистрированную команду
         registerDefaultAction((absSender, message) -> {
-            LOGGER.info("Registering unknown command from @" + message.getFrom().getUserName()
+            LOGGER.info("Registering unknown command from " + message.getFrom().getUserName()
                     + " : " + message.getText() + "...");
 
             SendMessage commandUnknownMessage = new SendMessage();
@@ -62,91 +58,65 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
 
     /**
      * Ответ на полученный update (сообщение не начинающееся с / или из клавиатуры)
-     *
      * @param update - полученное обновление
      */
     @Override
     public void processNonCommandUpdate(Update update) {
         LOGGER.info("processNonCommandUpdate...");
         SendMessage message = new SendMessage();
-
-        //we get test message
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            LOGGER.info("Executing non-custom update from @" +
-                    update.getMessage().getFrom().getUserName() +
-                    " : " + update.getMessage().getText() + "...");
-
-            message.setChatId(update.getMessage().getChatId())
-                    .setText("You said: " + update.getMessage().getText() +
-                            ", I don't know what to do with this" +
-                            EmojiParser.parseToUnicode(":cry: \n") +
-                            "maybe you need /help");
-            try {
-                execute(message); // Call method to send the message
-            } catch (TelegramApiException e) {
-                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
-            }
+            //message generation
             //we get location
-        } else if (update.getMessage().hasLocation()) {
-            Location location = update.getMessage().getLocation();
-            LOGGER.info("Get location from @" + update.getMessage().getFrom().getUserName() + ' ' + location);
-
-            message.setChatId(update.getMessage().getChatId());
-            String lat = String.format(Locale.US, "%.2f", location.getLatitude());
-            String lon = String.format(Locale.US, "%.2f", location.getLongitude());
-
-            Weather weather = new Weather(lat, lon);
-            String[] parseWeather = weather.getWeatherNow();
-
-            //set new weather in base
-            TgBasePostgresql base = new TgBasePostgresql();
-            if (!base.isWeather(parseWeather)) {
-                base.addWeather(parseWeather);
-            } else if (!base.isUserCity(parseWeather[0])){
-                //TODO: лучше после обновления
-                base.addUserCity(parseWeather[0]);
-            }
-            message.setText(weather.toWrap(parseWeather))
-                    .setReplyMarkup(getKeyboard());
-
-            try {
-                execute(message); // Call method to send the message
-            } catch (TelegramApiException e) {
-                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
-            }
-            //save city quick
+        if (update.getMessage().hasLocation()) {
+            message = getMessageLocation(update)
+                    .setReplyMarkup(getKeyboardRemind());
+            //remind weather
         } else if (update.hasCallbackQuery()) {
-                String call_data = update.getCallbackQuery().getData();
-                if (call_data.equals("save_city")) {
-                    //TODO: мониторинг погоды
-                }
-            //we get someone else
-        } else {
-            LOGGER.info("Executing non-custom update from @" +
-                    update.getMessage().getFrom().getUserName() + "without text!");
-
-            message.setChatId(update.getMessage().getChatId())
-                    .setText("I don't know what to do with this" +
-                            EmojiParser.parseToUnicode(":cry: \n") +
-                            "maybe you need /help");
-            try {
-                execute(message); // Call method to send the message
-            } catch (TelegramApiException e) {
-                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+            String call_data = update.getCallbackQuery().getData();
+            if (call_data.equals("remind_weather")) {
+                message = getMessageRemind(update);
+            } else {
+                message = getMessageNot(update);
             }
+            //text message
+        }else if (update.hasMessage() && update.getMessage().hasText()) {
+            String text = update.getMessage().getText();
+            message = getMessageNot(update, text);
+            // we get someone else
+        } else {
+            message = getMessageNot(update);
+        }
+        try {
+            execute(message); // Call method to send the message
+        } catch (TelegramApiException e) {
+            LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
         }
     }
 
-    public static InlineKeyboardMarkup getKeyboard() {
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<>();
-        rowInline.add(new InlineKeyboardButton().setText("save this city?").setCallbackData("save_city"));
-        // Set the keyboard to the markup
-        rowsInline.add(rowInline);
-        // Add it to the message
-        markupInline.setKeyboard(rowsInline);
-        return markupInline;
+    private SendMessage getMessageNot(Update update){
+        SendMessage message = new SendMessage();
+
+        LOGGER.info("Executing non-custom update from @" +
+                update.getMessage().getFrom().getUserName() + "without text!");
+
+        message.setChatId(update.getMessage().getChatId())
+                .setText("I don't know what to do with this" +
+                        EmojiParser.parseToUnicode(":cry: \n") +
+                        "maybe you need /help");
+        return  message;
+    }
+
+    private SendMessage getMessageNot(Update update, String text){
+        SendMessage message = new SendMessage();
+
+        LOGGER.info("Executing non-custom update from @" +
+                update.getMessage().getFrom().getUserName() + "without text!");
+
+        message.setChatId(update.getMessage().getChatId())
+                .setText("You said: " + text +
+                        ", I don't know what to do with this" +
+                        EmojiParser.parseToUnicode(":cry: \n") +
+                        "maybe you need /help");
+        return  message;
     }
 
     @Override
