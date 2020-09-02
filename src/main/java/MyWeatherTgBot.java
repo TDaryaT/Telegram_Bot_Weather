@@ -88,7 +88,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
                 //someone else
                 SendMessage messageNot = getMessageNot(update);
                 HelpCommand helpCommand = new HelpCommand(this);
-                message = helpCommand.getHelpMessage();
+                message = helpCommand.getHelpMessage(chat_id);
                 try {
                     execute(messageNot); // Call method to send the message
                 } catch (TelegramApiException e) {
@@ -100,7 +100,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             String text = update.getMessage().getText();
             SendMessage messageNot = getMessageNot(update, text);
             HelpCommand helpCommand = new HelpCommand(this);
-            message = helpCommand.getHelpMessage();
+            message = helpCommand.getHelpMessage(update.getMessage().getChatId());
             try {
                 execute(messageNot); // Call method to send the message
             } catch (TelegramApiException e) {
@@ -113,7 +113,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
             /* we get someone else */
             SendMessage messageNot = getMessageNot(update);
             HelpCommand helpCommand = new HelpCommand(this);
-            message = helpCommand.getHelpMessage();
+            message = helpCommand.getHelpMessage(update.getMessage().getChatId());
             try {
                 execute(messageNot); // Call method to send the message;
             } catch (TelegramApiException e) {
@@ -135,8 +135,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
 
         message.setChatId(update.getMessage().getChatId())
                 .setText("I don't know what to do with this" +
-                        EmojiParser.parseToUnicode(":cry: \n") +
-                        "maybe you need /help");
+                        EmojiParser.parseToUnicode(":cry: \n"));
         return  message;
     }
 
@@ -149,8 +148,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
         message.setChatId(update.getMessage().getChatId())
                 .setText("You said: " + text +
                         ", I don't know what to do with this" +
-                        EmojiParser.parseToUnicode(":cry: \n") +
-                        "maybe you need /help");
+                        EmojiParser.parseToUnicode(":cry: \n"));
         return  message;
     }
 

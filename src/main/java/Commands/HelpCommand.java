@@ -28,8 +28,7 @@ public class HelpCommand extends BotCommand {
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
         LOGGER.info(getCommandIdentifier() + " Executing '/help' command from @" + user.getUserName() + "...");
 
-        SendMessage helpMessage = getHelpMessage()
-                .setChatId(chat.getId().toString());
+        SendMessage helpMessage = getHelpMessage(chat.getId());
         try {
             absSender.execute(helpMessage);
         } catch (TelegramApiException e) {
@@ -37,7 +36,7 @@ public class HelpCommand extends BotCommand {
         }
     }
 
-    public SendMessage getHelpMessage(){
+    public SendMessage getHelpMessage(long chat_id){
         StringBuilder helpMessageBuilder = new StringBuilder();
         helpMessageBuilder.append("<b>What's commands I can do </b>")
                 .append(EmojiParser.parseToUnicode(":question: "));
@@ -51,6 +50,7 @@ public class HelpCommand extends BotCommand {
         }
         return new SendMessage()
                 .enableHtml(true)
-                .setText(helpMessageBuilder.toString());
+                .setText(helpMessageBuilder.toString())
+                .setChatId(chat_id);
     }
 }

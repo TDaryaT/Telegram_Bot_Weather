@@ -134,8 +134,8 @@ public class Weather {
         double tempFeelsLike = Double.parseDouble(weather[3]) - 273.15;
 
         stringBuilder
-                        .append(EmojiParser.parseToUnicode(":house: "))
-                        .append("Location: ").append(weather[0]).append('\n')
+                .append(EmojiParser.parseToUnicode(":house: "))
+                .append("Location: ").append(weather[0]).append('\n')
                 .append(EmojiParser.parseToUnicode(":white_sun_small_cloud: "))
                 .append("Weather condition: ").append(weather[1]).append('\n')
                 .append(EmojiParser.parseToUnicode(":thermometer: "))
