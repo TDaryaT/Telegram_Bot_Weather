@@ -8,8 +8,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import static Commands.ReminderCommand.getKeyboardRemind;
-import static Commands.ReminderCommand.getMessageRemind;
+import static Commands.BadWeatherCommand.getMessageRemind;
+import static Commands.LocateCommand.location;
 import static Commands.WeatherCommand.getMessageWeatherNow;
 
 public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
@@ -36,8 +36,10 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
         register(new StopCommand());
         LOGGER.info("Registering '/weather'...");
         register(new WeatherCommand());
-        //LOGGER.info("Registering '/reminder'...");
-        //register(new ReminderCommand());
+        LOGGER.info("Registering '/bad_weather'...");
+        register(new BadWeatherCommand());
+        LOGGER.info("Registering '/location'...");
+        register(new LocateCommand());
 
         // ответ на незарегистрированную команду
         registerDefaultAction((absSender, message) -> {
@@ -64,31 +66,59 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
     @Override
     public void processNonCommandUpdate(Update update) {
         LOGGER.info("processNonCommandUpdate...");
-        SendMessage message = new SendMessage();
+        SendMessage message;
 
         //message generation
         if (update.hasCallbackQuery()) {
+            /* callback from keyboard*/
             LOGGER.info("Callback Query...");
             String call_data = update.getCallbackQuery().getData();
-            if (call_data.equals("remind_weather")) {
-                //remind weather
-                LOGGER.info("remind weather..");
-                message = getMessageRemind(update);
+            int user_id = update.getCallbackQuery().getFrom().getId();
+            long chat_id = update.getCallbackQuery().getMessage().getChatId();
+
+            if (call_data.equals("bad_weather")) {
+                //bad weather
+                LOGGER.info("When bad weather..");
+                message = getMessageRemind(user_id, chat_id);
+            } else if (call_data.equals("weather")) {
+                //now weather
+                LOGGER.info("Weather now...");
+                message = getMessageWeatherNow(user_id, chat_id);
             } else {
-                message = getMessageNot(update);
+                //someone else
+                SendMessage messageNot = getMessageNot(update);
+                HelpCommand helpCommand = new HelpCommand(this);
+                message = helpCommand.getHelpMessage();
+                try {
+                    execute(messageNot); // Call method to send the message
+                } catch (TelegramApiException e) {
+                    LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+                }
             }
         }else if (update.hasMessage() && update.getMessage().hasText()) {
-            //text message
+            /* text message */
             String text = update.getMessage().getText();
-            message = getMessageNot(update, text);
-
-        } else if (update.getMessage().hasLocation()) {
-            //we get location
-            message = getMessageWeatherNow(update)
-                    .setReplyMarkup(getKeyboardRemind());
+            SendMessage messageNot = getMessageNot(update, text);
+            HelpCommand helpCommand = new HelpCommand(this);
+            message = helpCommand.getHelpMessage();
+            try {
+                execute(messageNot); // Call method to send the message
+            } catch (TelegramApiException e) {
+                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+            }
+        } else if (update.hasMessage() && update.getMessage().hasLocation()) {
+            /* we get location */
+           message = location(update);
         } else {
-            // we get someone else
-            message = getMessageNot(update);
+            /* we get someone else */
+            SendMessage messageNot = getMessageNot(update);
+            HelpCommand helpCommand = new HelpCommand(this);
+            message = helpCommand.getHelpMessage();
+            try {
+                execute(messageNot); // Call method to send the message;
+            } catch (TelegramApiException e) {
+                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+            }
         }
         try {
             execute(message); // Call method to send the message
@@ -122,6 +152,11 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
                         EmojiParser.parseToUnicode(":cry: \n") +
                         "maybe you need /help");
         return  message;
+    }
+
+    /* operations to be executed not in response to an update */
+    public void sendNotification() {
+        //TODO: do stuff for example send a notification to some user
     }
 
     @Override

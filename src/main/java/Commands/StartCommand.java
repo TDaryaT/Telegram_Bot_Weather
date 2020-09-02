@@ -28,13 +28,12 @@ public class StartCommand extends BotCommand {
 
         TgBasePostgresql base = new TgBasePostgresql();
         //user not new
-        if (base.isUserId(user)) {
+        if (base.isUserId(user.getId())) {
             sb.append("Hi again! ")
                     .append(EmojiParser.parseToUnicode(" :heart_eyes: \n"))
                     .append("I really thought you wouldn't come back... \n")
                     .append("If you forgot that i can look '/help'");
         } else {
-            base.setUserID(user);
             sb.append("Hi ")
                     .append(user.getUserName())
                     .append("! Welcome to My WeatherBot!")

@@ -26,7 +26,7 @@ public class Weather {
 
     private static final Logger LOGGER = LogManager.getLogger(Weather.class);
 
-    public Weather(String latitude, String longitude) {
+    public Weather(double latitude, double longitude) {
         LOGGER.info("generate Weather...");
         Weather.latitude = "lat=" + latitude;
         Weather.longitude = "&lon=" + longitude;
@@ -36,7 +36,7 @@ public class Weather {
         return API_NOW + latitude + longitude + API_KEY;
     }
 
-    private static String getURL5Days_3H(){
+    private static String getURL5Days_3H() {
         return API_5DAYS_3H + latitude + longitude + API_KEY;
     }
 
@@ -94,7 +94,7 @@ public class Weather {
         return weatherInfo;
     }
 
-    public String[] getWeather3H(int user) {
+    public String[] getWeather3H() {
         String[] weatherInfo = new String[6];
         JSONObject obj = new JSONObject(getAPIContentForJSON(getURL5Days_3H()));
         LOGGER.info("get URL ");
@@ -102,22 +102,29 @@ public class Weather {
         weatherInfo[0] = obj.getJSONObject("city").get("name").toString();
         JSONArray list = obj.getJSONArray("list");
 
+        double temp = Double.parseDouble(list.getJSONObject(0).getJSONObject("main").get("temp").toString());
+
         for (Object o : list) {
             JSONObject elem = (JSONObject) o;
+
             weatherInfo[1] = elem.getJSONArray("weather").getJSONObject(0).get("description").toString();
             weatherInfo[2] = elem.getJSONObject("main").get("temp").toString();
             weatherInfo[3] = elem.getJSONObject("main").get("feels_like").toString();
             weatherInfo[4] = elem.getJSONObject("wind").get("speed").toString();
             weatherInfo[5] = elem.get("dt_txt").toString();
-            if (hasBigChanges(weatherInfo, user)) {
+
+            boolean tempChanges = Math.abs(temp - Double.parseDouble(weatherInfo[2])) > 7;
+            temp = Double.parseDouble(weatherInfo[2]);
+            if (hasBigChanges(weatherInfo) || tempChanges) {
                 break;
             }
         }
-
         return weatherInfo;
     }
+
     /**
      * translate weather for telegram bot
+     *
      * @param weather - massive with information
      * @return - String with message
      */
@@ -127,8 +134,8 @@ public class Weather {
         double tempFeelsLike = Double.parseDouble(weather[3]) - 273.15;
 
         stringBuilder
-        //        .append(EmojiParser.parseToUnicode(":house: "))
-        //        .append("Location: ").append(weather[0]).append('\n')
+                        .append(EmojiParser.parseToUnicode(":house: "))
+                        .append("Location: ").append(weather[0]).append('\n')
                 .append(EmojiParser.parseToUnicode(":white_sun_small_cloud: "))
                 .append("Weather condition: ").append(weather[1]).append('\n')
                 .append(EmojiParser.parseToUnicode(":thermometer: "))
@@ -140,25 +147,23 @@ public class Weather {
 
         return stringBuilder.toString();
     }
+
     /**
      * @param weatherInfo массив с информацией о погоде вида:
-     * result[0] = Shuzenji (city)
-     * result[1] = clear sky
-     * result[2] = 281.52 (Kelvin)
-     * result[3] = 278.99 (feels_like)
-     * result[4] = 0.47 (seed wind)
-     * result[5] = date
+     *                    result[0] = Shuzenji (city)
+     *                    result[1] = clear sky
+     *                    result[2] = 281.52 (Kelvin)
+     *                    result[3] = 278.99 (feels_like)
+     *                    result[4] = 0.47 (seed wind)
+     *                    result[5] = date
      */
-    public static boolean hasBigChanges(String[] weatherInfo, int user) {
-        TgBasePostgresql base = new TgBasePostgresql();
-        String[] oldWeather = base.getWeather(user);
-
+    public static boolean hasBigChanges(String[] weatherInfo) {
         boolean description = weatherInfo[1].contains("shower rain") ||
                 weatherInfo[1].contains("rain") ||
                 weatherInfo[1].contains("thunderstorm") ||
                 weatherInfo[1].contains("snow");
-        boolean temp_like = Math.abs(Double.parseDouble(oldWeather[3]) - Double.parseDouble(weatherInfo[3])) > 5;
-        boolean speed_wind = Math.abs(Double.parseDouble(oldWeather[4]) - Double.parseDouble(weatherInfo[4])) > 2;
-        return description || temp_like || speed_wind;
+
+        boolean speed_wind = Double.parseDouble(weatherInfo[4]) > 5.;
+        return description || speed_wind;
     }
 }
