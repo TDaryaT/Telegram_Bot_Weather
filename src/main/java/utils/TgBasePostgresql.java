@@ -173,7 +173,7 @@ public class TgBasePostgresql {
      * @param user_id - id user in tg
      * @return latitude this user
      */
-    public int getLatUser(int user_id) {
+    public double getLatUser(int user_id) {
         try (Connection con = DriverManager.getConnection(url, user, passwd);
              PreparedStatement pst = con.prepareStatement("SELECT lat FROM users WHERE user_id=" + user_id);
              ResultSet rs = pst.executeQuery()) {
@@ -189,7 +189,7 @@ public class TgBasePostgresql {
      * @param user_id - id user in tg
      * @return longitude this user
      */
-    public int getLonUser(int user_id) {
+    public double getLonUser(int user_id) {
         try (Connection con = DriverManager.getConnection(url, user, passwd);
              PreparedStatement pst = con.prepareStatement("SELECT lon FROM users WHERE user_id=" + user_id);
              ResultSet rs = pst.executeQuery()) {
@@ -323,4 +323,23 @@ public class TgBasePostgresql {
         }
     }
 
+    public String[] getWeather(int user_id) {
+        String city = getCityUser(user_id);
+        String[] weather =  new String[6];
+        try (Connection con = DriverManager.getConnection(url, user, passwd);
+             PreparedStatement pst = con.prepareStatement("SELECT * FROM weather WHERE city='" + city +'\'');
+             ResultSet rs = pst.executeQuery()) {
+            rs.next();
+            weather[0] = rs.getString(1);
+            weather[1] = rs.getString(2);
+            weather[2] = String.valueOf(rs.getDouble(3));
+            weather[3] = String.valueOf(rs.getDouble(4));
+            weather[4] = String.valueOf(rs.getDouble(5));
+            weather[5] = String.valueOf(rs.getDate(6));
+            return weather;
+        } catch (SQLException e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 }

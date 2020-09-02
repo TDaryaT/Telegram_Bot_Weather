@@ -8,8 +8,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import static Commands.ReminderCommand.*;
-import static Commands.WeatherCommand.getMessageLocation;
+import static Commands.ReminderCommand.getKeyboardRemind;
+import static Commands.ReminderCommand.getMessageRemind;
+import static Commands.WeatherCommand.getMessageWeatherNow;
 
 public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
     private static final String BOT_TOKEN = System.getenv("TOKEN");
@@ -35,8 +36,8 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
         register(new StopCommand());
         LOGGER.info("Registering '/weather'...");
         register(new WeatherCommand());
-        LOGGER.info("Registering '/reminder'...");
-        register(new ReminderCommand());
+        //LOGGER.info("Registering '/reminder'...");
+        //register(new ReminderCommand());
 
         // ответ на незарегистрированную команду
         registerDefaultAction((absSender, message) -> {
@@ -64,25 +65,29 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
     public void processNonCommandUpdate(Update update) {
         LOGGER.info("processNonCommandUpdate...");
         SendMessage message = new SendMessage();
-            //message generation
-            //we get location
-        if (update.getMessage().hasLocation()) {
-            message = getMessageLocation(update)
-                    .setReplyMarkup(getKeyboardRemind());
-            //remind weather
-        } else if (update.hasCallbackQuery()) {
+
+        //message generation
+        if (update.hasCallbackQuery()) {
+            LOGGER.info("Callback Query...");
             String call_data = update.getCallbackQuery().getData();
             if (call_data.equals("remind_weather")) {
+                //remind weather
+                LOGGER.info("remind weather..");
                 message = getMessageRemind(update);
             } else {
                 message = getMessageNot(update);
             }
-            //text message
         }else if (update.hasMessage() && update.getMessage().hasText()) {
+            //text message
             String text = update.getMessage().getText();
             message = getMessageNot(update, text);
-            // we get someone else
+
+        } else if (update.getMessage().hasLocation()) {
+            //we get location
+            message = getMessageWeatherNow(update)
+                    .setReplyMarkup(getKeyboardRemind());
         } else {
+            // we get someone else
             message = getMessageNot(update);
         }
         try {

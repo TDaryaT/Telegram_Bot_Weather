@@ -46,7 +46,7 @@ public class WeatherCommand extends BotCommand {
         }
     }
 
-    public static SendMessage getMessageLocation(Update update) {
+    public static SendMessage getMessageWeatherNow(Update update) {
         SendMessage message = new SendMessage();
 
         Location location = update.getMessage().getLocation();
