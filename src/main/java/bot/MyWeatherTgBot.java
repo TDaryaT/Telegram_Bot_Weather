@@ -1,3 +1,5 @@
+package bot;
+
 import Commands.*;
 import com.vdurmont.emoji.EmojiParser;
 import org.apache.log4j.LogManager;
@@ -66,7 +68,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
     @Override
     public void processNonCommandUpdate(Update update) {
         LOGGER.info("processNonCommandUpdate...");
-        SendMessage message;
+        SendMessage message = new SendMessage();
 
         //message generation
         if (update.hasCallbackQuery()) {
@@ -84,40 +86,31 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
                 //now weather
                 LOGGER.info("Weather now...");
                 message = getMessageWeatherNow(user_id, chat_id);
-            } else {
-                //someone else
-                SendMessage messageNot = getMessageNot(update);
+            }
+        } else if (update.hasMessage()) {
+            if (update.getMessage().hasLocation()) {
+                message = location(update);
+            } else if (update.getMessage().hasText()) {
+                /* text message */
+                String text = update.getMessage().getText();
+                SendMessage messageNot = getMessageNot(update, text);
                 HelpCommand helpCommand = new HelpCommand(this);
-                message = helpCommand.getHelpMessage(chat_id);
+                message = helpCommand.getHelpMessage(update.getMessage().getChatId());
                 try {
                     execute(messageNot); // Call method to send the message
                 } catch (TelegramApiException e) {
                     LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
                 }
-            }
-        }else if (update.hasMessage() && update.getMessage().hasText()) {
-            /* text message */
-            String text = update.getMessage().getText();
-            SendMessage messageNot = getMessageNot(update, text);
-            HelpCommand helpCommand = new HelpCommand(this);
-            message = helpCommand.getHelpMessage(update.getMessage().getChatId());
-            try {
-                execute(messageNot); // Call method to send the message
-            } catch (TelegramApiException e) {
-                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
-            }
-        } else if (update.hasMessage() && update.getMessage().hasLocation()) {
-            /* we get location */
-           message = location(update);
-        } else {
-            /* we get someone else */
-            SendMessage messageNot = getMessageNot(update);
-            HelpCommand helpCommand = new HelpCommand(this);
-            message = helpCommand.getHelpMessage(update.getMessage().getChatId());
-            try {
-                execute(messageNot); // Call method to send the message;
-            } catch (TelegramApiException e) {
-                LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+            } else {
+                /* we get someone else */
+                SendMessage messageNot = getMessageNot(update);
+                HelpCommand helpCommand = new HelpCommand(this);
+                message = helpCommand.getHelpMessage(update.getMessage().getChatId());
+                try {
+                    execute(messageNot); // Call method to send the message;
+                } catch (TelegramApiException e) {
+                    LOGGER.error("Error execute in non-custom command " + e.getMessage(), e);
+                }
             }
         }
         try {
@@ -130,8 +123,7 @@ public class MyWeatherTgBot extends TelegramLongPollingCommandBot {
     private SendMessage getMessageNot(Update update){
         SendMessage message = new SendMessage();
 
-        LOGGER.info("Executing non-custom update from @" +
-                update.getMessage().getFrom().getUserName() + "without text!");
+        LOGGER.info("Executing non-custom update from without text!");
 
         message.setChatId(update.getMessage().getChatId())
                 .setText("I don't know what to do with this" +

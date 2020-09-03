@@ -3,14 +3,7 @@ package utils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.*;
-import java.util.Properties;
 
 /**
  * This class create for data processing with 2 data bases, described in the file tgbase.sql
@@ -24,31 +17,10 @@ public class TgBasePostgresql {
 
     public TgBasePostgresql() {
         LOGGER.info("Connecting bd...");
-        Properties props = readProperties();
 
-        url = props.getProperty("db.url");
-        user = props.getProperty("db.user");
-        passwd = System.getenv("bd_password");
-    }
-
-    /**
-     * @return properties for access the base
-     */
-    public static Properties readProperties() {
-        Properties props = new Properties();
-        Path myPath = Paths.get("src/main/resources/database.properties");
-
-        try {
-            LOGGER.info("read bd properties...");
-            BufferedReader bf = Files.newBufferedReader(myPath,
-                    StandardCharsets.UTF_8);
-
-            props.load(bf);
-        } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
-        }
-
-        return props;
+        url = System.getenv("DATABASE_URL");
+        user = System.getenv("DATABASE_USER");
+        passwd = System.getenv("DATABSE_PASSWORD");
     }
 
     /**

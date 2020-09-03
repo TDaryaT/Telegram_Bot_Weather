@@ -1,9 +1,9 @@
-package Commands;
+package notification;
 
 import bot.MyWeatherTgBot;
 import org.quartz.*;
 
-public class NotUpdateCommand implements Job {
+public class SendBadWeather implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         /* Retrieve the bot instance */
