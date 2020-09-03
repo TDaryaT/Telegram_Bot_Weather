@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+/*<<<<<<< HEAD
 package notification;
 =======
 package Commands;
@@ -14,7 +14,8 @@ public class NotUpdateCommand implements Job {
 >>>>>>> origin/master
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        /* Retrieve the bot instance */
+         Retrieve the bot instance */
+/*
         SchedulerContext schedulerContext = null;
         try {
             schedulerContext = jobExecutionContext.getScheduler().getContext();
@@ -26,3 +27,4 @@ public class NotUpdateCommand implements Job {
         bot.sendNotification();
     }
 }
+*/

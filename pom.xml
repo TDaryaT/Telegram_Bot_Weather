@@ -6,19 +6,19 @@
 
     <groupId>org.example</groupId>
     <artifactId>MyWeatherTgBot</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
-                <version>1.1.1</version>
+                <version>2.0.0</version>
                 <configuration>
                     <assembleDirectory>target</assembleDirectory>
                     <programs>
                         <program>
                             <mainClass>bot.Main</mainClass>
-                            <name>weatherBot</name>
+                            <name>MyWeatherTgBot</name>
                         </program>
                     </programs>
                 </configuration>
