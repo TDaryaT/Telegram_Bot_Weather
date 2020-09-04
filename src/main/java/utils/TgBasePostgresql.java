@@ -18,7 +18,7 @@ public class TgBasePostgresql {
     public TgBasePostgresql() {
         LOGGER.info("Connecting bd...");
 
-        url = System.getenv("DATABASE_URL");
+        url = System.getenv("JDBC_DATABASE_URL");
         user = System.getenv("DATABASE_USER");
         passwd = System.getenv("DATABSE_PASSWORD");
     }
