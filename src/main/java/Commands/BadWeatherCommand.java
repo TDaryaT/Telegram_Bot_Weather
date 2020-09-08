@@ -24,7 +24,7 @@ public class BadWeatherCommand extends BotCommand {
 
     public BadWeatherCommand() {
         super("bad_weather",
-                "I'll tell you when and how the weather gets worse \n");
+                "determines the nearest bad weather (rain, snow, strong wind, etc.) by your coordinates \n");
     }
 
     @Override
