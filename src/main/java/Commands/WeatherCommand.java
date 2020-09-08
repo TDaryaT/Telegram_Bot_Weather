@@ -56,11 +56,12 @@ public class WeatherCommand extends BotCommand {
             rowsInline.add(getKeyboardWorseWeather());
             markupInline.setKeyboard(rowsInline);
 
-            return message.setText(weather.toWrap(parseWeather))
+            return message.setText("The weather now: \n" +
+                    weather.toWrap(parseWeather))
                     .setReplyMarkup(markupInline)
                     .setChatId(chat_id);
         } else {
-            return message.setText("I don't say weather, if I didn't know where are you. " +
+            return message.setText("I can't tell the weather, if I don't know where are you. " +
                     "I need your coordinates").setReplyMarkup(getKeyboardLoc());
         }
     }

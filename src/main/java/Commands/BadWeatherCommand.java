@@ -23,7 +23,7 @@ public class BadWeatherCommand extends BotCommand {
     private static final Logger LOGGER = LogManager.getLogger(BadWeatherCommand.class);
 
     public BadWeatherCommand() {
-        super("bed_weather",
+        super("bad_weather",
                 "I'll tell you when and how the weather gets worse \n");
     }
 
@@ -66,7 +66,7 @@ public class BadWeatherCommand extends BotCommand {
                     weather.toWrap(parseWeather))
                     .setReplyMarkup(markupInline);
         } else {
-            return message.setText("I don't say worse weather, if I didn't know where are you. " +
+            return message.setText("I can't tell the weather, if I don't know where are you. " +
                     "I need your coordinates").setReplyMarkup(getKeyboardLoc());
         }
     }

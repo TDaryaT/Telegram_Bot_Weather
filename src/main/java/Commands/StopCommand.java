@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import utils.TgBasePostgresql;
 
 public class StopCommand extends BotCommand {
     private static final Logger LOGGER = LogManager.getLogger(StartCommand.class);
@@ -24,6 +25,8 @@ public class StopCommand extends BotCommand {
         answer.setChatId(chat.getId().toString());
         answer.setText("Good bye " + userName + "\n" + "Hope to see you soon!");
 
+        TgBasePostgresql base = new TgBasePostgresql();
+        base.deleteUser(user.getId());
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {

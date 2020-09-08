@@ -9,7 +9,6 @@ import java.sql.*;
  * This class create for data processing with 2 data bases, described in the file tgbase.sql
  */
 public class TgBasePostgresql {
-    //TODO: переделать запросы на человеческие
     private static final Logger LOGGER = LogManager.getLogger(TgBasePostgresql.class);
     private final String url;
     private final String user;
@@ -122,6 +121,15 @@ public class TgBasePostgresql {
         } catch (SQLException e) {
             LOGGER.error(e.getMessage());
             return 0;
+        }
+    }
+
+    public void deleteUser(int user_id) {
+        try (Connection con = DriverManager.getConnection(url, user, passwd);
+             PreparedStatement pst = con.prepareStatement("DELETE FROM users WHERE user_id=" + user_id)) {
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.error(e.getMessage());
         }
     }
 }
