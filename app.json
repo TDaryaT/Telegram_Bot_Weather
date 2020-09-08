@@ -1,0 +1,18 @@
+{
+  "name": "Telegram Bot Weather",
+  "description": "A Telegram bot using java",
+  "repository": "https://github.com/TDaryaT/Telegram_Bot_Weather",
+  "logo": "https://github.com/TDaryaT/Telegram_Bot_Weather/blob/master/img/logo_Dasha-What-The-Weather.png",
+  "keywords": [
+    "java",
+    "telegram-bot",
+    "example",
+    "weather"
+  ],
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}

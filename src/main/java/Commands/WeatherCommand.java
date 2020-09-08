@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import utils.TgBasePostgresql;
+import utils.PostgresqlUser;
 import utils.Weather;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class WeatherCommand extends BotCommand {
     public static SendMessage getMessageWeatherNow(int user_id, long chat_id) {
         SendMessage message = new SendMessage();
 
-        TgBasePostgresql base = new TgBasePostgresql();
+        PostgresqlUser base = new PostgresqlUser();
         if (base.isUserId(user_id)) {
             Weather weather = new Weather(base.getLatUser(user_id), base.getLonUser(user_id));
             String[] parseWeather = weather.getWeatherNow();

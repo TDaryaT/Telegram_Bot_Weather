@@ -16,7 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import utils.TgBasePostgresql;
+import utils.PostgresqlUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class LocateCommand extends BotCommand {
         }
     }
     public static void setLocation(int user_id, double lat, double lon){
-        TgBasePostgresql base = new TgBasePostgresql();
+        PostgresqlUser base = new PostgresqlUser();
         if (!base.isUserId(user_id)){
             base.setUserID(user_id);
         }

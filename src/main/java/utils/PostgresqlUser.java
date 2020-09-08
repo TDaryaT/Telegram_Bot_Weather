@@ -8,13 +8,13 @@ import java.sql.*;
 /**
  * This class create for data processing with 2 data bases, described in the file tgbase.sql
  */
-public class TgBasePostgresql {
-    private static final Logger LOGGER = LogManager.getLogger(TgBasePostgresql.class);
+public class PostgresqlUser {
+    private static final Logger LOGGER = LogManager.getLogger(PostgresqlUser.class);
     private final String url;
     private final String user;
     private final String passwd;
 
-    public TgBasePostgresql() {
+    public PostgresqlUser() {
         LOGGER.info("Connecting bd...");
 
         url = System.getenv("JDBC_DATABASE_URL");
@@ -127,6 +127,7 @@ public class TgBasePostgresql {
     public void deleteUser(int user_id) {
         try (Connection con = DriverManager.getConnection(url, user, passwd);
              PreparedStatement pst = con.prepareStatement("DELETE FROM users WHERE user_id=" + user_id)) {
+            LOGGER.info("Delete user from bd ...");
             pst.executeUpdate();
         } catch (SQLException e) {
             LOGGER.error(e.getMessage());

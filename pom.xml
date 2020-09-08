@@ -5,10 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>MyWeatherTgBot</artifactId>
+    <artifactId>Telegram_bot_Weather</artifactId>
     <version>1.0</version>
     <build>
         <plugins>
+            <!--assembly for heroku-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
@@ -18,7 +19,7 @@
                     <programs>
                         <program>
                             <mainClass>bot.Main</mainClass>
-                            <name>MyWeatherTgBot</name>
+                            <name>Telegram_Bot_Weather</name>
                         </program>
                     </programs>
                 </configuration>

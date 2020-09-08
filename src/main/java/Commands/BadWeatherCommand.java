@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import utils.TgBasePostgresql;
+import utils.PostgresqlUser;
 import utils.Weather;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class BadWeatherCommand extends BotCommand {
         SendMessage message = new SendMessage();
         LOGGER.info("Bad weather ...");
 
-        TgBasePostgresql base = new TgBasePostgresql();
+        PostgresqlUser base = new PostgresqlUser();
 
         message.setChatId(chat_id);
         if (base.isUserId(user_id)) {
