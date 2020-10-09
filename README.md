@@ -2,6 +2,8 @@
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/TDaryaT/Telegram_Bot_Weather) 
 
+![Java CI with Maven](https://github.com/TDaryaT/Telegram_Bot_Weather/workflows/Java%20CI%20with%20Maven/badge.svg)
+
 This is my project of a telegram bot for weather control.
 
 ## <img src="https://github.com/TDaryaT/Telegram_Bot_Weather/blob/master/img/logo_Dasha-What-The-Weather.png" width = 25> DARIA, WHAT THE WEATHER
